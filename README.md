@@ -7,6 +7,8 @@ A tool used to get best parameters on different cpu.
 * Clone, `git clone https://github.com/6block/zkwork_aleo_bench.git`
 * Build, `cargo build --release`
 
+Or you can download the pre-built version, `wget https://github.com/6block/zkwork_aleo_bench/releases/download/v0.0.1/prover`
+
 ## Usage
 
 Try different values for `--parallel_num` and `--threads` to get the highest hashrate.
