@@ -56,7 +56,7 @@ impl Prover {
         let difficulty = 1024;
         task::spawn(async move {
             let epoch_hash = <CurrentNetwork as Network>::BlockHash::default();
-            p.new_work(difficulty, epoch_hash, cpu_threads).await;
+            p.new_work(difficulty, epoch_hash).await;
         });
 
         info!("Created prover message handler");
@@ -107,7 +107,6 @@ impl Prover {
         &self,
         share_difficulty: u64,
         epoch_hash: <CurrentNetwork as Network>::BlockHash,
-        cpu_threads: u16,
     ) {
         let terminator = self.terminator.clone();
         let thread_pools = self.thread_pools.clone();
@@ -135,34 +134,33 @@ impl Prover {
                                     debug!("process({i}) exit.");
                                     break;
                                 }
-                                for _ in 0..cpu_threads {
-                                    let prover_solution = match puzzle.prove(
-                                        epoch_hash,
-                                        address,
-                                        rand::thread_rng().gen(),
-                                        Some(share_difficulty),
-                                    ) {
-                                        Ok(solution) => solution,
-                                        Err(error) => {
-                                            trace!("Failed to generate prover solution: {error}");
-                                            total_proofs.fetch_add(1, Ordering::SeqCst);
-                                            continue;
-                                        }
-                                    };
-                                    let solution_target = prover_solution.target();
-                                    match solution_target >= share_difficulty {
-                                        true => {
-                                            info!("Found a Solution (Proof Target {}, Target {})",solution_target, share_difficulty);
-                                        }
-                                        false => debug!(
-                                            "Prover solution was below the necessary proof target ({solution_target} < {share_difficulty})"
-                                        ),
+                                let prover_solution = match puzzle.prove(
+                                    epoch_hash,
+                                    address,
+                                    rand::thread_rng().gen(),
+                                    Some(share_difficulty),
+                                ) {
+                                    Ok(solution) => solution,
+                                    Err(error) => {
+                                        trace!("Failed to generate prover solution: {error}");
+                                        total_proofs.fetch_add(1, Ordering::SeqCst);
+                                        continue;
                                     }
-                                    total_proofs.fetch_add(1, Ordering::SeqCst);
+                                };
+                                let solution_target = prover_solution.target();
+                                match solution_target >= share_difficulty {
+                                    true => {
+                                        info!("Found a Solution (Proof Target {}, Target {})",solution_target, share_difficulty);
+                                    }
+                                    false => debug!(
+                                        "Prover solution was below the necessary proof target ({solution_target} < {share_difficulty})"
+                                    ),
                                 }
+                                total_proofs.fetch_add(1, Ordering::SeqCst);
                             }
                         });
                 });
+                sleep(Duration::from_millis(20));
             }
         });
     }
