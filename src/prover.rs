@@ -56,7 +56,7 @@ impl Prover {
         let difficulty = 1024;
         task::spawn(async move {
             let epoch_hash = <CurrentNetwork as Network>::BlockHash::default();
-            p.new_work(difficulty, epoch_hash, cpu_threads).await;
+            p.new_work(difficulty, epoch_hash).await;
         });
 
         info!("Created prover message handler");
@@ -107,7 +107,6 @@ impl Prover {
         &self,
         share_difficulty: u64,
         epoch_hash: <CurrentNetwork as Network>::BlockHash,
-        cpu_threads: u16,
     ) {
         let terminator = self.terminator.clone();
         let thread_pools = self.thread_pools.clone();
@@ -135,7 +134,6 @@ impl Prover {
                                     debug!("process({i}) exit.");
                                     break;
                                 }
-                                //for _ in 0..1 {
                                 let prover_solution = match puzzle.prove(
                                     epoch_hash,
                                     address,
@@ -159,7 +157,6 @@ impl Prover {
                                     ),
                                 }
                                 total_proofs.fetch_add(1, Ordering::SeqCst);
-                                //}
                             }
                         });
                 });

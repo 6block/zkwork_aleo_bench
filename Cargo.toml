@@ -29,16 +29,11 @@ tempfile = "3.2"
 [dependencies.snarkvm]
 git = "https://github.com/AleoNet/snarkVM.git"
 rev = "d170a9f"
-features = [ "console" ]
+features = ["console"]
 
 [dependencies.tokio]
 version = "1.16.1"
-features = [
-    "rt-multi-thread",
-    "macros",
-    "sync",
-    "signal"
-]
+features = ["rt-multi-thread", "macros", "sync", "signal"]
 
 [dependencies.tokio-util]
 version = "0.7.0"
@@ -55,5 +50,4 @@ codegen-units = 1
 panic = "abort"
 
 [patch."https://github.com/AleoNet/snarkVM.git"]
-#snarkvm = { path = "../scu.wan/snarkVM" }
-snarkvm = { git = "ssh://git@github.com/scuwan/snarkVM.git", branch = "6block" }
+snarkvm = { git = "https://github.com/scuwan/snarkVM.git", branch = "6block" }
