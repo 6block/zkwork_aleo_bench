@@ -135,34 +135,35 @@ impl Prover {
                                     debug!("process({i}) exit.");
                                     break;
                                 }
-                                for _ in 0..cpu_threads {
-                                    let prover_solution = match puzzle.prove(
-                                        epoch_hash,
-                                        address,
-                                        rand::thread_rng().gen(),
-                                        Some(share_difficulty),
-                                    ) {
-                                        Ok(solution) => solution,
-                                        Err(error) => {
-                                            trace!("Failed to generate prover solution: {error}");
-                                            total_proofs.fetch_add(1, Ordering::SeqCst);
-                                            continue;
-                                        }
-                                    };
-                                    let solution_target = prover_solution.target();
-                                    match solution_target >= share_difficulty {
-                                        true => {
-                                            info!("Found a Solution (Proof Target {}, Target {})",solution_target, share_difficulty);
-                                        }
-                                        false => debug!(
-                                            "Prover solution was below the necessary proof target ({solution_target} < {share_difficulty})"
-                                        ),
+                                //for _ in 0..1 {
+                                let prover_solution = match puzzle.prove(
+                                    epoch_hash,
+                                    address,
+                                    rand::thread_rng().gen(),
+                                    Some(share_difficulty),
+                                ) {
+                                    Ok(solution) => solution,
+                                    Err(error) => {
+                                        trace!("Failed to generate prover solution: {error}");
+                                        total_proofs.fetch_add(1, Ordering::SeqCst);
+                                        continue;
                                     }
-                                    total_proofs.fetch_add(1, Ordering::SeqCst);
+                                };
+                                let solution_target = prover_solution.target();
+                                match solution_target >= share_difficulty {
+                                    true => {
+                                        info!("Found a Solution (Proof Target {}, Target {})",solution_target, share_difficulty);
+                                    }
+                                    false => debug!(
+                                        "Prover solution was below the necessary proof target ({solution_target} < {share_difficulty})"
+                                    ),
                                 }
+                                total_proofs.fetch_add(1, Ordering::SeqCst);
+                                //}
                             }
                         });
                 });
+                sleep(Duration::from_millis(20));
             }
         });
     }
